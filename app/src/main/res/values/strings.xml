@@ -7,5 +7,6 @@
     <string name="share_text">Поделиться</string>
     <string name="temperature_label">Температура</string>
     <string name="feels_like_label">Ощущается как</string>
-    <string name="coordinates_text">Координаты</string>
+    <string name="coordinates_text">Ваши координаты:</string>
+    <string name="city_coordinates">долгота: %s, ширина: %s"</string>
 </resources>

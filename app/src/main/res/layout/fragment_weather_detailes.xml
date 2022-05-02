@@ -6,6 +6,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".WeatherDetailesFragment">
 
+    <Button
+        android:id="@+id/buttonGetWeather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/margin_15_dp"
+        android:text="@string/button_get_weather_text"
+        android:layout_margin="@dimen/margin_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
     <TextView
         android:id="@+id/coordinatesName"
         android:layout_width="wrap_content"
@@ -14,17 +27,31 @@
   android:text="@string/coordinates_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/buttonGetWeather"/>
 
-    <TextView
-        android:id="@+id/cityCoordinates"
+    <EditText
+        android:id="@+id/editTextLatitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_15_dp"
+        android:ems="10"
+        android:hint="Широта"
+        android:inputType="date"
+        android:text="55.0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/coordinatesName"
-        tools:text="lt/ln: 55.755826, 37.617299900000035" />
+        app:layout_constraintTop_toBottomOf="@+id/coordinatesName" />
+
+    <EditText
+        android:id="@+id/editTextTextLongitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Долгота"
+        android:inputType=""
+        android:text="55.0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextLatitude" />
 
     <TextView
         android:id="@+id/weatherCondition"
@@ -35,7 +62,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cityCoordinates"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTextLongitude"
         tools:text="Облачно" />
 
     <TextView
@@ -81,6 +108,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/feelsLikeLabel"
         tools:text="-23" />
+
+    <Button
+        android:id="@+id/setWeatherToDB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="показать погоду"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feelsLikeValue" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/setWeatherToDB" />
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

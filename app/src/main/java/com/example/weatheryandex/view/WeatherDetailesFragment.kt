@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
@@ -134,7 +135,8 @@ open class WeatherDetailesFragment : Fragment() {
             cv, "_id = 1", null
         )
         rs?.requery()
-
+        val i = Intent("my.action")
+        context?.sendBroadcast(i)
     }
 
     private fun renderData(factDTO: FactDTO?) {
@@ -267,7 +269,6 @@ open class WeatherDetailesFragment : Fragment() {
                 val locationManager =
                     context.getSystemService(Context.LOCATION_SERVICE) as
                             LocationManager
-                var tar = 1
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     val provider =
                         locationManager.getProvider(LocationManager.GPS_PROVIDER)

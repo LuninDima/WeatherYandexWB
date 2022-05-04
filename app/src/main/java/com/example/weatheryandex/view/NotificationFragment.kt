@@ -37,14 +37,7 @@ class NotificationFragment : Fragment() {
     private fun getWeatherForNotification() {
 
         val rs = requireActivity().contentResolver.query(
-            WeatherContentProvider.CONTENT_URI, arrayOf(
-                WeatherContentProvider._ID,
-                WeatherContentProvider.LAT,
-                WeatherContentProvider.LON,
-                WeatherContentProvider.CONDITION,
-                WeatherContentProvider.TEMPERATURE,
-                WeatherContentProvider.FEELSLIKE
-            ),
+            WeatherContentProvider.CONTENT_URI, arrayOf(),
             null, null, null
         )
         if (rs != null) {
@@ -62,22 +55,32 @@ class NotificationFragment : Fragment() {
         }
     }
 
-    private fun startNotification() {
+    fun startNotification() {
         binding.buttonStartService.setOnClickListener {
             getWeatherForNotification()
             ServiceNotification.startService(requireContext(), "$weather")
-            Toast.makeText(requireContext(), "Отображение погоды в Notification запущено.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Отображение погоды в Notification запущено.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         binding.buttonStopService.setOnClickListener {
             ServiceNotification.stopService(requireContext())
-            Toast.makeText(requireContext(), "Отображение погоды в Notification остановлено.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Отображение погоды в Notification остановлено.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
     companion object {
 
-        fun newInstance() = NotificationFragment()
+        fun newInstance(): NotificationFragment {
+            return NotificationFragment()
 
+        }
     }
 }

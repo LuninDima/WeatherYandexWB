@@ -51,6 +51,8 @@ class WeatherContentProvider: ContentProvider()  {
         return count
     }
 
+
+
     companion object{
         val PROVIDER_NAME = "com.example.weatheryandex/WeatherContentProvider"
         val URL = "content://$PROVIDER_NAME/WEATHER_DB"

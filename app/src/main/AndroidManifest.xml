@@ -3,9 +3,11 @@
     package="com.example.weatheryandex">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
 
     <application
@@ -26,11 +28,23 @@
             </intent-filter>
         </activity>
         <provider
-            android:authorities="com.example.weatheryandex"
             android:name=".ContentProvider.WeatherContentProvider"
+            android:authorities="com.example.weatheryandex"
             android:exported="true"
-            android:grantUriPermissions="true"/>
-       <service android:name="com.example.weatheryandex.ServiceNotification.ServiceNotification"/>
+            android:grantUriPermissions="true" />
+        <service android:name="com.example.weatheryandex.ServiceNotification.ServiceNotification" />
+        <receiver
+            android:name=".BroadcastReciever.BroadcastReciever"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="my.action" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+               <action android:name="android.intent.action.PROVIDER_CHANGED"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
+
 
 </manifest>

@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity"
->
+    tools:context=".view.MainActivity">
 
 
  <LinearLayout
@@ -16,40 +15,47 @@
 
   <Button
       android:id="@+id/button_settings"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_weight="1"
-      android:text="@string/button_settings_text"
       android:layout_margin="@dimen/margin_button"
-      />
+      android:layout_weight="1"
+      android:text="@string/button_settings_text" />
 
   <Button
       android:id="@+id/button_share"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_margin="@dimen/margin_button"
       android:layout_weight="1"
-      android:text="@string/button_share_text"
-      android:layout_margin="@dimen/margin_button"/>
+      android:text="@string/button_share_text" />
  </LinearLayout>
 
  <androidx.appcompat.widget.LinearLayoutCompat
-     android:layout_width="wrap_content"
+     android:layout_width="match_parent"
      android:layout_height="wrap_content">
 
 
   <Button
-      android:id="@+id/button_check"
-      android:layout_width="wrap_content"
+      android:id="@+id/button_notification"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_margin="@dimen/margin_button"
       android:layout_weight="1"
-      android:text="@string/button_check_text"
-      android:layout_margin="@dimen/margin_button"/>
+      android:text="@string/button_notification_text" />
+
+  <Button
+      android:id="@+id/button_to_main"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_margin="@dimen/margin_button"
+      android:layout_weight="1"
+      android:text="@string/button_text_main" />
  </androidx.appcompat.widget.LinearLayoutCompat>
 
  <FrameLayout
+     android:id="@+id/fragment_container"
      android:layout_width="match_parent"
-     android:layout_height="match_parent"
-     android:id="@+id/fragment_container">
+     android:layout_height="match_parent">
 
  </FrameLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>

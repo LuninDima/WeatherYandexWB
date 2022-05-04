@@ -5,7 +5,7 @@
     <string name="share_text">Поделиться</string>
     <string name="temperature_label">Температура</string>
     <string name="feels_like_label">Ощущается как</string>
-    <string name="coordinates_text">Ваши координаты:</string>
+    <string name="coordinates_text">Введите Ваши координаты:</string>
     <string name="city_coordinates">долгота: %s, ширина: %s"</string>
 
     <string name="dialog_button_close">Закрыть</string>
@@ -24,6 +24,12 @@
     <string name="dialog_address_title">Ваш адрес</string>
     <string name="dialog_address_get_weather">Узнать погоду</string>
     <string name="button_check_text">Проверка</string>
-    <string name="button_get_weather_text">Узнать погоду</string>
+    <string name="button_get_weather_text">Узнать погоду по GPS</string>
+    <string name="button_text_main">Главная</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="button_notification_text">Уведомления</string>
+    <string name="button_start_service_text">Включить</string>
+    <string name="button_stop_service">Выключить</string>
 
 </resources>

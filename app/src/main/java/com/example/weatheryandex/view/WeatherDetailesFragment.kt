@@ -1,4 +1,4 @@
-package com.example.weatheryandex
+package com.example.weatheryandex.view
 
 import android.Manifest
 import android.app.AlertDialog
@@ -18,6 +18,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.example.weatheryandex.ContentProvider.WeatherContentProvider
+import com.example.weatheryandex.R
 import com.example.weatheryandex.databinding.FragmentWeatherDetailesBinding
 import com.example.weatheryandex.model.*
 import com.google.gson.Gson
@@ -33,16 +34,15 @@ private const val MAIN_LINK =
 private const val REQUEST_API_KEY =
     "X-Yandex-API-Key" // заголовок ключа APi Яндекс Погода (https://yandex.ru/dev/weather/doc/dg/concepts/about.html).
 private const val REQUEST_CODE = 12345
-private const val REFRESH_PERIOD = 60000L
-private const val MINIMAL_DISTANCE = 100f
+private const val REFRESH_PERIOD = 600L
+private const val MINIMAL_DISTANCE = 10000f
 
 
-class WeatherDetailesFragment : Fragment() {
+open class WeatherDetailesFragment : Fragment() {
 
     private var _binding: FragmentWeatherDetailesBinding? = null
     private val binding get() = _binding!!
     private lateinit var weatherBundle: Weather
-    //  var factWeather  = FactDTO(0,0,"ясно")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,20 +57,13 @@ class WeatherDetailesFragment : Fragment() {
         weatherBundle = Weather(getDefaultCity())
         var lat = (binding.editTextLatitude.text.toString()).toDouble()
         var lon = (binding.editTextTextLongitude.text.toString()).toDouble()
-        getDataByClick()
-        getCoordinates()
+        getDataByUserCoordinates()
+        getDataByGPS()
 
 
     }
 
-    companion object {
-        fun newInstance(): WeatherDetailesFragment {
-            val fragment = WeatherDetailesFragment()
-            return fragment
-        }
-    }
-
-    private fun getDataByClick() {
+    private fun getDataByUserCoordinates() {
 
         binding.setWeatherToDB.setOnClickListener {
             var lat = (binding.editTextLatitude.text.toString()).toDouble()
@@ -79,9 +72,90 @@ class WeatherDetailesFragment : Fragment() {
         }
     }
 
+    open fun getWeather(lat: Double, long: Double) {
+        val client = OkHttpClient()
+        val builder: Request.Builder = Request.Builder()
+        builder.header(REQUEST_API_KEY, YANDEX_API_KEY)
+        builder.url(MAIN_LINK + "lat=${lat}&lon=${long}&lang=kk_KZ")
+        val request: Request = builder.build()
+        val call: Call = client.newCall(request)
+        call.enqueue(object : Callback {
+            val handler: Handler = Handler()
 
-    private fun getCoordinates() {
+            @Throws(IOException::class)
+            override fun onResponse(call: Call, response: Response) {
+                val serverResponce: String? = response.body()?.string()
+                Log.d("mylogs", "$serverResponce")
+                if (response.isSuccessful && serverResponce != null) {
+                    handler.post {
+                        var factDTO = Gson().fromJson(serverResponce, WeatherDTO::class.java).fact
+                        saveWeatherToDB(factDTO, lat, long)
+                        renderData(factDTO)
+
+                        // елси код ответа 200 или 300 и сам ответ не пустой, то выполняем заполнение данных через renderData
+                    }
+                } else {
+                    Log.d("mylogs", "ошибка")
+                }
+            }
+
+            override fun onFailure(call: Call, e: IOException) {
+                Log.d(
+                    "mylogs",
+                    "ошибка"
+                )    // ошибка. Выводится в случае если не пришел никакой ответ.
+            }
+        })
+    }
+
+    private fun saveWeatherToDB(factDTO: FactDTO?, lat: Double, long: Double) {
+        var rs = requireActivity().contentResolver.query(
+            WeatherContentProvider.CONTENT_URI,
+            arrayOf(
+                WeatherContentProvider._ID,
+                WeatherContentProvider.LAT,
+                WeatherContentProvider.LON,
+                WeatherContentProvider.CONDITION,
+                WeatherContentProvider.TEMPERATURE,
+                WeatherContentProvider.FEELSLIKE
+            ),
+            null,
+            null,
+            null
+        )
+        var cv = ContentValues()
+        cv.put(WeatherContentProvider.LAT, lat)
+        cv.put(WeatherContentProvider.LON, long)
+        cv.put(WeatherContentProvider.CONDITION, factDTO?.condition)
+        cv.put(WeatherContentProvider.TEMPERATURE, factDTO?.temp)
+        cv.put(WeatherContentProvider.FEELSLIKE, factDTO?.feels_like)
+        requireActivity().contentResolver.update(
+            WeatherContentProvider.CONTENT_URI,
+            cv, "_id = 1", null
+        )
+        rs?.requery()
+
+    }
+
+    private fun renderData(factDTO: FactDTO?) {
+
+        if (factDTO?.temp == null || factDTO.feels_like == null ||
+            factDTO.condition.isNullOrEmpty()
+        ) {
+            TODO("PROCESS_ERROR")
+        } else {
+            binding.temperatureValue.text = factDTO.temp.toString()
+            binding.feelsLikeValue.text = factDTO.feels_like.toString()
+            binding.weatherCondition.text = factDTO.condition
+        }
+
+
+    }
+
+    private fun getDataByGPS() {
         binding.buttonGetWeather.setOnClickListener { checkPermissoin() }
+
+
     }
 
     private fun checkPermissoin() {
@@ -89,13 +163,13 @@ class WeatherDetailesFragment : Fragment() {
             when {
                 ContextCompat.checkSelfPermission(
                     it,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
                         == PackageManager.PERMISSION_GRANTED -> {
                     getLocation()
                 }
 
-                shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
                 -> {
                     showRationaleDialog()
                 }
@@ -193,6 +267,7 @@ class WeatherDetailesFragment : Fragment() {
                 val locationManager =
                     context.getSystemService(Context.LOCATION_SERVICE) as
                             LocationManager
+                var tar = 1
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     val provider =
                         locationManager.getProvider(LocationManager.GPS_PROVIDER)
@@ -278,95 +353,16 @@ class WeatherDetailesFragment : Fragment() {
         }
     }
 
-
-    private fun getWeather(lat: Double, long: Double) {
-        val client = OkHttpClient()
-        val builder: Request.Builder = Request.Builder()
-        builder.header(REQUEST_API_KEY, YANDEX_API_KEY)
-        builder.url(MAIN_LINK + "lat=${lat}&lon=${long}&lang=kk_KZ")
-        val request: Request = builder.build()
-        val call: Call = client.newCall(request)
-        call.enqueue(object : Callback {
-            val handler: Handler = Handler()
-
-            @Throws(IOException::class)
-            override fun onResponse(call: Call, response: Response) {
-                val serverResponce: String? = response.body()?.string()
-                Log.d("mylogs", "$serverResponce")
-                if (response.isSuccessful && serverResponce != null) {
-                    handler.post {
-                        var factDTO = Gson().fromJson(serverResponce, WeatherDTO::class.java).fact
-                        saveWeatherToDB(factDTO, lat, long)
-
-                        renderData(Gson().fromJson(serverResponce, WeatherDTO::class.java))
-
-                        // елси код ответа 200 или 300 и сам ответ не пустой, то выполняем заполнение данных через renderData
-                    }
-                } else {
-                    Log.d("mylogs", "ошибка")
-                }
-            }
-
-            override fun onFailure(call: Call, e: IOException) {
-                Log.d(
-                    "mylogs",
-                    "ошибка"
-                )    // ошибка. Выводится в случае если не пришел никакой ответ.
-            }
-        })
-    }
-
-  private  fun saveWeatherToDB(factDTO: FactDTO?, lat: Double, long: Double){
-        var rs = requireActivity().contentResolver.query(
-            WeatherContentProvider.CONTENT_URI,
-            arrayOf(
-                WeatherContentProvider._ID,
-                WeatherContentProvider.LAT,
-                WeatherContentProvider.LON,
-                WeatherContentProvider.CONDITION,
-                WeatherContentProvider.TEMPERATURE,
-                WeatherContentProvider.FEELSLIKE
-            ),
-            null,
-            null,
-            null
-        )
-        var cv = ContentValues()
-        cv.put(WeatherContentProvider.LAT, lat)
-        cv.put(WeatherContentProvider.LON, long)
-        cv.put(WeatherContentProvider.CONDITION, factDTO?.condition)
-        cv.put(WeatherContentProvider.TEMPERATURE, factDTO?.temp)
-        cv.put(WeatherContentProvider.FEELSLIKE, factDTO?.feels_like)
-        requireActivity().contentResolver.update(
-            WeatherContentProvider.CONTENT_URI,
-            cv, "_id = 1", null
-        )
-        rs?.requery()
-
-    }
-
-    private fun renderData(weatherDTO: WeatherDTO) {
-        val fact = weatherDTO.fact
-
-        if (fact == null || fact.temp == null || fact.feels_like == null ||
-            fact.condition.isNullOrEmpty()
-        ) {
-            TODO("PROCESS_ERROR")
-        } else {
-            binding.temperatureValue.text = fact.temp.toString()
-            binding.feelsLikeValue.text = fact.feels_like.toString()
-            binding.weatherCondition.text = fact.condition
-        }
-
-
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-
+    companion object {
+        fun newInstance(): WeatherDetailesFragment {
+            return WeatherDetailesFragment()
+        }
+    }
 }
 
 

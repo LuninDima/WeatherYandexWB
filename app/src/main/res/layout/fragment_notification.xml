@@ -6,7 +6,16 @@
     android:orientation="vertical"
     tools:context=".view.MainActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="При включении этой настройки данные о погоде будут отображаться сверху в Notification (Уведомлении)"/>
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

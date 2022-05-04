@@ -5,6 +5,17 @@
     android:orientation="vertical"
     tools:context=".view.MainActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="При включении этой настройки данные в Notification будут автоматически обновляться
+при получении новых погодных данных"/>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,14 +29,6 @@
             android:layout_margin="@dimen/margin_button"
             android:layout_weight="1"
             android:text="@string/button_start_service_text" />
-
-        <Button
-            android:id="@+id/button_stop_Broadcast"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_button"
-            android:layout_weight="1"
-            android:text="@string/button_stop_service" />
     </LinearLayout>
 
 

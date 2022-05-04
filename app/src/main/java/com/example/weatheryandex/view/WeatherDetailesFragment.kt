@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.weatheryandex.ContentProvider.WeatherContentProvider
 import com.example.weatheryandex.R
@@ -26,16 +27,27 @@ import com.google.gson.Gson
 import okhttp3.*
 import java.io.IOException
 
+
+/**
+ * Стартовый экран приложения. Здесь пользователь может получить данные погоды по заданным координатам
+ * или по GPS данным. Здесь формируется и отправляется запрос в API яндекс Погоды. В случае успешного
+ * ответа данные отображаются на экране и делается запрос на сохранение данных в БД.
+ *
+ *
+ *
+ *
+ **/
+
 //0e7a90df-1b5c-4bde-b811-478b2ed254a9
 //67b1446d-066a-4ac9-a6e4-6b1c7294d5ce
 private const val YANDEX_API_KEY =
-    "0e7a90df-1b5c-4bde-b811-478b2ed254a9" // ключ разработчика API Яндекса (https://developer.tech.yandex.ru/services/). Удалить. после проверки приложения.
+    "67b1446d-066a-4ac9-a6e4-6b1c7294d5ce" // ключ разработчика API Яндекса (https://developer.tech.yandex.ru/services/). Удалить. после проверки приложения.
 private const val MAIN_LINK =
     "https://api.weather.yandex.ru/v2/informers?" // Основной урл запроса для получения погоды
 private const val REQUEST_API_KEY =
     "X-Yandex-API-Key" // заголовок ключа APi Яндекс Погода (https://yandex.ru/dev/weather/doc/dg/concepts/about.html).
 private const val REQUEST_CODE = 12345
-private const val REFRESH_PERIOD = 600L
+private const val REFRESH_PERIOD = 60L
 private const val MINIMAL_DISTANCE = 10000f
 
 
@@ -43,7 +55,7 @@ open class WeatherDetailesFragment : Fragment() {
 
     private var _binding: FragmentWeatherDetailesBinding? = null
     private val binding get() = _binding!!
-    private lateinit var weatherBundle: Weather
+   //- private lateinit var weatherBundle: Weather
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,60 +67,77 @@ open class WeatherDetailesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        weatherBundle = Weather(getDefaultCity())
-        var lat = (binding.editTextLatitude.text.toString()).toDouble()
-        var lon = (binding.editTextTextLongitude.text.toString()).toDouble()
+            //-    weatherBundle = Weather(getDefaultCity())
+        // Вызываем функцю получения данных по координатам, которые задал пользователь.
         getDataByUserCoordinates()
+        //  // Вызываем функцю получения данных по координатам, которые задал пользователь.
         getDataByGPS()
 
 
     }
-
+    // функция получения данных по координатам, которые задал пользователь.
     private fun getDataByUserCoordinates() {
-
+        // по нажатию на кнопку "показать погоду". Долгота (lat) и Широта (lon) будут считаны из текстовых полей
+        // editTextLatitude и editTextTextLongitude, преобразованы в дробное значение и записаны в переменные lat и lon
+        //
         binding.setWeatherToDB.setOnClickListener {
+            // считываем Долготу из текстового поля editTextLatitude
             var lat = (binding.editTextLatitude.text.toString()).toDouble()
+            // считываем Широту из текстового поля editTextLatitude
             var lon = (binding.editTextTextLongitude.text.toString()).toDouble()
+                // вызываем функцию получения данных от удаленного сервера https://api.weather.yandex.ru/v2/informers?
             getWeather(lat, lon)
         }
     }
+     //функция получения данных от удаленного сервера https://api.weather.yandex.ru/v2/informers?.
+    //Принимает дробные значения Долготы (lat) и Широты (long)
+        private fun getWeather(lat: Double, long: Double) {
 
-    open fun getWeather(lat: Double, long: Double) {
+         // объявляем клиент OkHttpClient()
         val client = OkHttpClient()
+            // создаем Билдер для запроса
         val builder: Request.Builder = Request.Builder()
+         // заголовок запроса
         builder.header(REQUEST_API_KEY, YANDEX_API_KEY)
+            // полный URL запроса
         builder.url(MAIN_LINK + "lat=${lat}&lon=${long}&lang=kk_KZ")
+            // инициализируем запрос билдера
         val request: Request = builder.build()
+            // ставим запрос в очередь
         val call: Call = client.newCall(request)
         call.enqueue(object : Callback {
             val handler: Handler = Handler()
 
+            // если ответ от сервера пришёл, то выполняем функцию onResponce
             @Throws(IOException::class)
             override fun onResponse(call: Call, response: Response) {
+                // сохраняем полученные данные в переменную serverResponce
                 val serverResponce: String? = response.body()?.string()
-                Log.d("mylogs", "$serverResponce")
+                // елси код ответа 200 или 300 и сам ответ не пустой, то выполняем
+                // преобразование полученных данных из Gson объекта в объект класса factDTO.
+                // передаем данные в функцию renderData для
                 if (response.isSuccessful && serverResponce != null) {
+                    var factDTO = Gson().fromJson(serverResponce, WeatherDTO::class.java).fact
+                    saveWeatherToDB(factDTO, lat, long)
                     handler.post {
-                        var factDTO = Gson().fromJson(serverResponce, WeatherDTO::class.java).fact
-                        saveWeatherToDB(factDTO, lat, long)
                         renderData(factDTO)
 
-                        // елси код ответа 200 или 300 и сам ответ не пустой, то выполняем заполнение данных через renderData
-                    }
+                   }
                 } else {
-                    Log.d("mylogs", "ошибка")
+                    Toast.makeText(context, "Ошибка, от сервера получены некорректные данные",
+                        Toast.LENGTH_LONG).show()
                 }
             }
 
             override fun onFailure(call: Call, e: IOException) {
-                Log.d(
-                    "mylogs",
-                    "ошибка"
-                )    // ошибка. Выводится в случае если не пришел никакой ответ.
+
+                    Toast.makeText(context, "Ошибка, невозможно подключиться к серверу. Проверьте интернет соединение",
+                        Toast.LENGTH_LONG).show()
+                   // ошибка. Выводится в случае если не пришел никакой ответ.
             }
         })
     }
-
+// cохранение полученных данных в базу данных.
     private fun saveWeatherToDB(factDTO: FactDTO?, lat: Double, long: Double) {
         var rs = requireActivity().contentResolver.query(
             WeatherContentProvider.CONTENT_URI,
@@ -135,10 +164,11 @@ open class WeatherDetailesFragment : Fragment() {
             cv, "_id = 1", null
         )
         rs?.requery()
+            // передача данных в Notification, если он включен.
         val i = Intent("my.action")
         context?.sendBroadcast(i)
     }
-
+    // вывод полученных данных на экран
     private fun renderData(factDTO: FactDTO?) {
 
         if (factDTO?.temp == null || factDTO.feels_like == null ||
@@ -154,12 +184,15 @@ open class WeatherDetailesFragment : Fragment() {
 
     }
 
+    // функция получения данных по GPS
     private fun getDataByGPS() {
         binding.buttonGetWeather.setOnClickListener { checkPermissoin() }
 
 
     }
 
+
+    // проверяем наличие разрешение на использование GPS. В случае его отсутствия - запрашиваем у пользователя.
     private fun checkPermissoin() {
         activity?.let {
             when {
@@ -256,7 +289,7 @@ open class WeatherDetailesFragment : Fragment() {
                 .show()
         }
     }
-
+// получение координат по GPS
     private fun getLocation() {
         activity?.let { context ->
             if (ContextCompat.checkSelfPermission(
@@ -303,18 +336,12 @@ open class WeatherDetailesFragment : Fragment() {
         }
     }
 
-    private val onLocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            context?.let {
-                getAddressAsync(it, location)
-            }
+    private val onLocationListener = LocationListener { location ->
+        context?.let {
+            getAddressAsync(it, location)
         }
-
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
     }
-
+// получение адреса пользователя по GPS координатам
     private fun getAddressAsync(
         context: Context,
         location: Location
@@ -336,7 +363,7 @@ open class WeatherDetailesFragment : Fragment() {
             }
         }.start()
     }
-
+    // отображение адреса и запрос на получение погоды по этому адрессу
     private fun showAddressDialog(address: String, location: Location) {
         activity?.let {
             AlertDialog.Builder(it)

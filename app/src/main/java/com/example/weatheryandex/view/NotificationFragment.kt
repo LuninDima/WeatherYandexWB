@@ -10,6 +10,14 @@ import com.example.weatheryandex.ContentProvider.WeatherContentProvider
 import com.example.weatheryandex.ServiceNotification.ServiceNotification
 import com.example.weatheryandex.databinding.FragmentNotificationBinding
 
+/**
+ * Экран настрйки Notification. При включении этой настройки данные о погоде будут отображаться сверху в Notification (Уведомлении)
+ *
+ *
+ * 1.4 Notification широко используются в музыкальных приложениях. Например. Spotify
+ * */
+
+
 class NotificationFragment : Fragment() {
     private var _binding: FragmentNotificationBinding? = null
     private val binding get() = _binding!!
@@ -33,9 +41,8 @@ class NotificationFragment : Fragment() {
         startNotification()
 
     }
-
+// передача данных погоды в Notification
     private fun getWeatherForNotification() {
-
         val rs = requireActivity().contentResolver.query(
             WeatherContentProvider.CONTENT_URI, arrayOf(),
             null, null, null
@@ -54,7 +61,7 @@ class NotificationFragment : Fragment() {
             }
         }
     }
-
+// включение отображения Notification
     fun startNotification() {
         binding.buttonStartService.setOnClickListener {
             getWeatherForNotification()
@@ -65,7 +72,7 @@ class NotificationFragment : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
         }
-
+// выключение отображения Notification
         binding.buttonStopService.setOnClickListener {
             ServiceNotification.stopService(requireContext())
             Toast.makeText(
@@ -78,9 +85,7 @@ class NotificationFragment : Fragment() {
 
     companion object {
 
-        fun newInstance(): NotificationFragment {
-            return NotificationFragment()
+        fun newInstance() = NotificationFragment()
 
         }
     }
-}

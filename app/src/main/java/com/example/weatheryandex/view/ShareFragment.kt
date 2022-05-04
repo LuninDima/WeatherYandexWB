@@ -8,7 +8,16 @@ import android.view.ViewGroup
 import com.example.weatheryandex.ContentProvider.WeatherContentProvider
 import com.example.weatheryandex.databinding.FragmentShareBinding
 
-
+/**
+ * Пример использования Content Provider'а (WeatherContentProvider)
+ *
+ * 1.4 Content Provider часто используется в файловых менеджерах, социальных сетях и т.д. Например, FaceBook
+ * https://developers.facebook.com/docs/reference/android/current/class/FacebookContentProvider/
+ * Content Provider хорошо подходит для экосистемы приложений, когда все нужные данные хранятся внутри устройтсва.
+ * Например, система учета клиентов с помощью контент провайдера делиться данными с системой аналитики и учета доходов/расходов
+ * Разделение приложений на несколько узкоспециализированных позволяет упростить пользовательский интерфейс каждого приложения,
+ * ускорить загрузку приложения и упростить разработку каждого приложения.
+ */
 class ShareFragment : Fragment() {
     private var _binding: FragmentShareBinding? = null
     private val binding get() = _binding!!
@@ -33,23 +42,18 @@ class ShareFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        getWeather()
+        getWeatherByButton()
 
     }
-
-    private fun getWeather() {
-        val rs = requireActivity().contentResolver.query(
-            WeatherContentProvider.CONTENT_URI, arrayOf(
-                WeatherContentProvider._ID,
-                WeatherContentProvider.LAT,
-                WeatherContentProvider.LON,
-                WeatherContentProvider.CONDITION,
-                WeatherContentProvider.TEMPERATURE,
-                WeatherContentProvider.FEELSLIKE
-            ),
-            null, null, null
-        )
+    private fun getWeatherByButton() {
+    // по клику на кнопку "Отобразить сохраненные данные" делается запрос на получение данных из базы данных через contentResolver
         binding.buttonGetWeather.setOnClickListener {
+            val rs = requireActivity().contentResolver.query(
+                WeatherContentProvider.CONTENT_URI, arrayOf(
+                ),
+                null, null, null
+            )
+                // если contentResolver не пустой, то выбирается элемент с позицией 0 и его данные заполняются в текстовые поля на экране.
             if (rs != null) {
                 if (rs.moveToPosition(0)) {
                     binding.cityCoordinates.text = String.format(
